@@ -58,7 +58,8 @@ BASE_DOCKER_RUN_OPTIONS="-it --rm \
     -m \"${MEMORY_LIMIT}\" \
     --env=\"DISPLAY\" \
     --env=\"QT_X11_NO_MITSHM=1\" \
-    --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\""
+    --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\" \
+    -v /var/lib/husarnet:/var/lib/husarnet \ "
 
 # Command to execute before docker run for X11 access
 XHOST_CMD="xhost +local:docker &&"
