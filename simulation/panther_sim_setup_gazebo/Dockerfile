@@ -34,7 +34,29 @@ RUN sudo apt-get update && sudo apt-get install -y \
 # Step 4: Create a ROS 2 workspace
 WORKDIR /
 RUN sudo mkdir /husarion_ws
+RUN sudo mkdir /husarion_ws/scripts
 RUN git clone -b master https://github.com/Grkila/husarion_ws.git /husarion_ws
+
+# Postavljamo environment varijable koje će biti dostupne u kontejneru i instalacija Husarnet-a i DDS-a
+
+RUN curl -s https://install.husarnet.com/install.sh | sudo bash
+
+ENV RELEASE="v1.3.5"
+ENV ARCH="amd64"
+
+RUN curl -L https://github.com/husarnet/husarnet-dds/releases/download/$RELEASE/husarnet-dds-linux-$ARCH -o /usr/local/bin/husarnet-dds
+RUN chmod +x /usr/local/bin/husarnet-dds
+
+RUN sudo apt-get update
+RUN sudo apt-get install -y ros-$ROS_DISTRO-rmw-cyclonedds-cpp 
+RUN apt-get install -y nano
+RUN apt-get install -y gedit
+
+#Dodatna podesavanja
+
+RUN git clone -b main https://github.com/Micoo1512/config.git /husarion_ws/scripts
+   
+RUN mv /husarion_ws/scripts/cyclonedds.xml /var/tmp/
 
 
 # Step 6: Initialize rosdep, import dependencies, install dependencies, and build the workspace
