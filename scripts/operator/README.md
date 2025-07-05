@@ -13,10 +13,12 @@ I isto na lokaciji /var/temp ce se nalaziti cyclonedds.xml unutar kontejnera za 
 U operator_ws se nalazi folder scripts i u njemu fajlovi cyclonedds_script.sh i cyclonedds_local.sh, to su skripte koja postavlju promjenljive da bi se mogla vrsiti komunikacija.Postoje 2 slucaja:
 
 I Komunikacija preko Husarnet-a odnosno dva odvojena racunara
-	U ovom slucaju u fajlu cyclonedds.xml se dodaju svi korisnici i samo se uradi source cyclonedds_script.sh
+	
+ U ovom slucaju u fajlu cyclonedds.xml se dodaju svi korisnici i samo se uradi source cyclonedds_script.sh
 
 
 II Lokalna komunikacija na jednom laptopu,ako neko zeli lokalno da ima jedan kontejner kao operator a drugi za simulaciju
-	U ovom slucaju cyclonedds.xml nije bitan i samo se uradi source cyclonedds_local.sh
+	
+ U ovom slucaju cyclonedds.xml nije bitan i samo se uradi source cyclonedds_local.sh
 	
 Ovi fajlovi ce se takodje nalaziti i u kontejneru za simulaciju,tako da ih i tamo morate source-ovati u zavisnosti od toga kako cete ih koristiti.
