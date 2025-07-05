@@ -6,7 +6,7 @@ U setup.sh jedino mozete promjeniti ime kontejnera ili cjelokupan naziv slike ak
 Kreirajte neki novi folder u koji cete ubaciti te fajlove.I uradite komandu "chmod +x setup.sh" da date odobrenje za izvrsavanje.
 Nakon toga jednostavno pokrenete setup.sh i kada on zavrsi pisace vam dalja uputstva kako da pokrenete kontejner i kada vam se pokrene bicete u folderu operator_ws.
 U root-u kontejnera na lokaciji /var/tmp se nalazi fajl cyclonedds.xml 
-u kome se u tagu Peers unose svi korisnici Husarnet mreze sa kojima zelite da komunicirate,pise i u samo fajlu kako.
+u kome se u tagu Peers unose svi korisnici Husarnet mreze sa kojima zelite da komunicirate,pise i u samom fajlu kako.
 
 Takodje kada osposobite kontejner za simulaciju unutar foldera husarion_ws osim fajlova za simulaciju imacete folder scripts koji je istog sadrzaja kao ovaj u operator_ws.
 I isto na lokaciji /var/temp ce se nalaziti cyclonedds.xml unutar kontejnera za simulaciju.
