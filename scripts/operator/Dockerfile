@@ -62,6 +62,7 @@ RUN mv /operator_ws/scripts/cyclonedds.xml /var/tmp/
 # This combines multiple steps into a single RUN command to ensure correct environment variable
 # scoping and to reduce Docker image layers.
 WORKDIR /operator_ws
+RUN . /opt/ros/$ROS_DISTRO/setup.bash
 
 # Step 7: Set up the entrypoint to source ROS 2 and the workspace
 # Ensure entrypoint.sh is present in the same directory as the Dockerfile (the build context).
