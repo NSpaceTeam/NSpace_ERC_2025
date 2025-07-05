@@ -5,6 +5,9 @@ U setup.sh jedino mozete promjeniti ime kontejnera ili cjelokupan naziv slike ak
 
 Kreirajte neki novi folder u koji cete ubaciti te fajlove.I uradite komandu "chmod +x setup.sh" da date odobrenje za izvrsavanje.
 Nakon toga jednostavno pokrenete setup.sh i kada on zavrsi pisace vam dalja uputstva kako da pokrenete kontejner i kada vam se pokrene bicete u folderu operator_ws.
+Sve je gotovo identicno kao za kontejner za simulaciju samo sto recimo umjesto komande run_husarion_nvidia kod operater se pominje komanda run_operator_nvidia,dakle
+samo su rijeci husarion i operator zammjenjene. 
+
 U root-u kontejnera na lokaciji /var/tmp se nalazi fajl cyclonedds.xml 
 u kome se u tagu Peers unose svi korisnici Husarnet mreze sa kojima zelite da komunicirate,pise i u samom fajlu kako.
 
