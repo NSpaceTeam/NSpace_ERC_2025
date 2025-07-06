@@ -18,7 +18,7 @@ U operator_ws se nalazi folder scripts i u njemu fajlovi cyclonedds_script.sh i 
 I Komunikacija preko Husarnet-a odnosno dva odvojena racunara
 	
    U ovom slucaju u fajlu cyclonedds.xml se dodaju svi korisnici i samo se uradi source cyclonedds_script.sh
-
+   Takodje je bitno da kada mijenjate fajl cyclonedds.xml on mora biti identican na oba racunara tj i na jednom i na drugom on mora da sadrzi sve korisnike koji se    nalaze na Husarnet mrezi sa kojima zelite da komunicirate.Taj fajl je najlakse promijeniti pomocu komandama nano ili gedit. 
 
 II Lokalna komunikacija na jednom laptopu,ako neko zeli lokalno da ima jedan kontejner kao operator a drugi za simulaciju
 	
