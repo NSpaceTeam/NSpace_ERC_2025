@@ -6,8 +6,8 @@ set -e
 # --- Configuration ---
 IMAGE_NAME="my-husarion-app:jazzy" # Or your preferred image name:tag
 DOCKERFILE_DIR="." # Assumes Dockerfile is in the current directory
-CPU_LIMIT="4" # Default CPU cores for the container
-MEMORY_LIMIT="8g" # Default RAM for the container
+CPU_LIMIT="6" # Default CPU cores for the container
+MEMORY_LIMIT="12g" # Default RAM for the container
 BASHRC_FILE="$HOME/.bashrc"
 # --- End Configuration ---
 
@@ -54,12 +54,13 @@ add_or_update_alias() {
 
 # Base docker run options for GUI
 BASE_DOCKER_RUN_OPTIONS="-it --rm \
+    --network host \
     --cpus=\"${CPU_LIMIT}\" \
-    -m \"${MEMORY_LIMIT}\" \
+    --memory=\"${MEMORY_LIMIT}\" \
     --env=\"DISPLAY\" \
     --env=\"QT_X11_NO_MITSHM=1\" \
     --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\" \
-    -v /var/lib/husarnet:/var/lib/husarnet \ "
+    -v /var/lib/husarnet:/var/lib/husarnet "
 
 # Command to execute before docker run for X11 access
 XHOST_CMD="xhost +local:docker &&"
@@ -76,6 +77,7 @@ ALIAS_NAME_NVIDIA="${ALIAS_PREFIX}_nvidia"
 ALIAS_CMD_NVIDIA="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
     --gpus all \
     --name husarion_nvidia \
+    --env=\"NVIDIA_DRIVER_CAPABILITIES=all \" \
     ${IMAGE_NAME} bash"
 add_or_update_alias "$ALIAS_NAME_NVIDIA" "$ALIAS_CMD_NVIDIA" "Husarion Docker: Run with NVIDIA GPU acceleration"
 
@@ -112,6 +114,11 @@ ALIAS_CMD_AMD="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
     ${IMAGE_NAME} bash"
 add_or_update_alias "$ALIAS_NAME_AMD" "$ALIAS_CMD_AMD" "Husarion Docker: Run with AMD GPU acceleration"
 
+# Alias for attaching to existing container
+ALIAS_NAME_ATTACH="${ALIAS_PREFIX}_attach"
+ALIAS_CMD_ATTACH="docker exec -it \$(docker ps -q --filter ancestor=${IMAGE_NAME}) bash"
+add_or_update_alias "$ALIAS_NAME_ATTACH" "$ALIAS_CMD_ATTACH" "Husarion Docker: Attach to running container"
+
 echo ""
 echo "--- Setup Complete ---"
 echo "Docker image '$IMAGE_NAME' is built."
@@ -122,5 +129,5 @@ echo "1. Source your .bashrc file or open a new terminal:"
 echo "   source $BASHRC_FILE"
 echo ""
 echo "The 'xhost +local:docker' command will now run automatically when you use the aliases."
-echo "You can use aliases like '$ALIAS_NAME_NO_GPU', '$ALIAS_NAME_NVIDIA', '$ALIAS_NAME_AMD', or '$ALIAS_NAME_INTEL' to start the container."
+echo "You can use aliases like '$ALIAS_NAME_NO_GPU', '$ALIAS_NAME_NVIDIA', '$ALIAS_NAME_AMD', '$ALIAS_NAME_INTEL' or '$ALIAS_NAME_ATTACH' to start the container."
 echo "Example: run_husarion_amd"
