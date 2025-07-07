@@ -4,11 +4,14 @@
 set -e
 
 # --- Configuration ---
-IMAGE_NAME="my-husarion-operator:jazzy" # Or your preferred image name:tag
-DOCKERFILE_DIR="." # Assumes Dockerfile is in the current directory
-CPU_LIMIT="4" # Default CPU cores for the container
-MEMORY_LIMIT="8g" # Default RAM for the container
+IMAGE_NAME="my-husarion-operator:jazzy" # Ili vaše željeno ime slike:tag
+DOCKERFILE_DIR="."                     # Pretpostavlja se da je Dockerfile u trenutnom direktorijumu
+CPU_LIMIT="6"                          # Broj CPU jezgara za kontejner
+MEMORY_LIMIT="12g"                     # RAM za kontejner
 BASHRC_FILE="$HOME/.bashrc"
+# --- Izmene na osnovu vašeg zahteva ---
+CONTAINER_NAME="operator"              # Ime koje će kontejner imati dok radi
+ALIAS_NAME="run_operator"              # Komanda (alias) za pokretanje kontejnera
 # --- End Configuration ---
 
 echo "--- Husarion Docker Setup Script ---"
@@ -23,12 +26,9 @@ else
     exit 1
 fi
 
-# 2. Add aliases to .bashrc
+# 2. Add a unified alias to .bashrc
 echo ""
-echo "Step 2: Configuring aliases in $BASHRC_FILE..."
-
-# Common alias prefix
-ALIAS_PREFIX="run_operator" #New name for operator
+echo "Step 2: Configuring the alias '$ALIAS_NAME' in $BASHRC_FILE..."
 
 # Helper function to add/update alias
 add_or_update_alias() {
@@ -36,11 +36,8 @@ add_or_update_alias() {
     local alias_command="$2"
     local alias_comment="$3"
 
-    # Remove existing alias definition if present
+    # Remove existing alias definition if present to avoid duplicates
     if grep -q "# ${alias_comment}" "$BASHRC_FILE"; then
-        # More robust way to remove multi-line alias if we had one,
-        # but for single line, this should suffice.
-        # We'll remove the comment line and the alias line.
         sed -i "/# ${alias_comment}/d" "$BASHRC_FILE"
         sed -i "/alias ${alias_name}=/d" "$BASHRC_FILE"
         echo "Removed existing alias definition for '${alias_name}' to update it."
@@ -52,72 +49,41 @@ add_or_update_alias() {
     echo "Added/Updated alias '${alias_name}' in $BASHRC_FILE."
 }
 
-# Base docker run options for GUI
-BASE_DOCKER_RUN_OPTIONS="-it \
-  --gpus all \
-  --name operator_docker \
-  --env=\"DISPLAY\" \
-  --env=\"QT_X11_NO_MITSHM=1\" \
-  --env=\"NVIDIA_DRIVER_CAPABILITIES=all\" \
-  --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\" \
-  --network host \
-  --memory=12g \
-  --cpus=6 \
-  --device /dev/dri \
-  -v /var/lib/husarnet:/var/lib/husarnet \
-  --privileged"
-
-# Command to execute before docker run for X11 access
+# The command to execute before docker run for X11 access
 XHOST_CMD="xhost +local:docker &&"
 
-# Alias for No GPU
-ALIAS_NAME_NO_GPU="${ALIAS_PREFIX}_nogpu"
-ALIAS_CMD_NO_GPU="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
-    --name operator_nogpu \
-    ${IMAGE_NAME} bash"
-add_or_update_alias "$ALIAS_NAME_NO_GPU" "$ALIAS_CMD_NO_GPU" "operator Docker: Run without dedicated GPU acceleration"
+# Unified docker run command.
+# --rm : Automatically remove the container when it exits. Prevents name conflicts.
+# --name ${CONTAINER_NAME} : Sets the name of the container.
+# --gpus all : Modern way to enable GPU access for NVIDIA and often AMD/Intel.
+# --device /dev/dri : Provides access to Direct Rendering Infrastructure, good for compatibility.
+UNIFIED_DOCKER_CMD="${XHOST_CMD} docker run -it --rm \
+  --name ${CONTAINER_NAME} \
+  --gpus all \
+  --network host \
+  --privileged \
+  --env=\"DISPLAY\" \
+  --env=\"QT_X11_NO_MITSHM=1\" \
+  --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\" \
+  --volume=\"/var/lib/husarnet:/var/lib/husarnet\" \
+  --device /dev/dri \
+  --memory=${MEMORY_LIMIT} \
+  --cpus=${CPU_LIMIT} \
+  ${IMAGE_NAME} bash"
 
-# Alias for NVIDIA GPU
-ALIAS_NAME_NVIDIA="${ALIAS_PREFIX}_nvidia"
-ALIAS_CMD_NVIDIA="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
-    --gpus all \
-    --name operator_nvidia \
-    ${IMAGE_NAME} bash"
-add_or_update_alias "$ALIAS_NAME_NVIDIA" "$ALIAS_CMD_NVIDIA" "operator Docker: Run with NVIDIA GPU acceleration"
-
-# Alias for AMD GPU
-# Try to get video group GID, fallback to render group GID if video group not found or getent fails
-VIDEO_GROUP_GID=$(getent group video | cut -d: -f3)
-if [ -z "$VIDEO_GROUP_GID" ]; then
-    echo "Warning: 'video' group not found. Trying 'render' group for AMD GPU."
-    RENDER_GROUP_GID=$(getent group render | cut -d: -f3)
-    if [ -z "$RENDER_GROUP_GID" ]; then
-        echo "ERROR: Neither 'video' nor 'render' group found. AMD GPU alias might not have correct permissions."
-        AMD_GROUP_ADD_CMD="" # leave empty if no group found
-    else
-        AMD_GROUP_ADD_CMD="--group-add=${RENDER_GROUP_GID}"
-    fi
-else
-    AMD_GROUP_ADD_CMD="--group-add=${VIDEO_GROUP_GID}"
-fi
-
-ALIAS_NAME_AMD="${ALIAS_PREFIX}_amd"
-ALIAS_CMD_AMD="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
-    --device=/dev/dri:/dev/dri \
-    ${AMD_GROUP_ADD_CMD} \
-    --name operator_amd \
-    ${IMAGE_NAME} bash"
-add_or_update_alias "$ALIAS_NAME_AMD" "$ALIAS_CMD_AMD" "operator Docker: Run with AMD GPU acceleration"
+# Add the single, unified alias
+add_or_update_alias "$ALIAS_NAME" "$UNIFIED_DOCKER_CMD" "Operator Docker: Run container '${CONTAINER_NAME}' with GUI/GPU"
 
 echo ""
 echo "--- Setup Complete ---"
 echo "Docker image '$IMAGE_NAME' is built."
-echo "Aliases have been added/updated in your $BASHRC_FILE."
+echo "Alias '$ALIAS_NAME' has been configured in your $BASHRC_FILE."
 echo ""
 echo "IMPORTANT NEXT STEPS:"
-echo "1. Source your .bashrc file or open a new terminal:"
+echo "1. To apply the changes, source your .bashrc file or open a new terminal:"
 echo "   source $BASHRC_FILE"
 echo ""
-echo "The 'xhost +local:docker' command will now run automatically when you use the aliases."
-echo "You can use aliases like '$ALIAS_NAME_NO_GPU', '$ALIAS_NAME_NVIDIA', or '$ALIAS_NAME_AMD' to start the container."
-echo "Example: run_operator_amd"
+echo "2. You can now start the container using the command:"
+echo "   $ALIAS_NAME"
+echo ""
+echo "When you run this command, a container named '${CONTAINER_NAME}' will be started."
