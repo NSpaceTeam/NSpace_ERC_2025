@@ -23,6 +23,7 @@ ENV HUSARION_ROS_BUILD_TYPE=simulation
 # python3-vcstool is needed for the 'vcs import' command.
 RUN sudo apt-get update && sudo apt-get install -y \
     git \
+    git-lfs \
     python3-colcon-common-extensions \
     python3-rosdep \
     python3-vcstool \
@@ -34,13 +35,14 @@ RUN sudo apt-get update && sudo apt-get install -y \
 # Step 4: Create a ROS 2 workspace
 WORKDIR /
 RUN sudo mkdir /husarion_ws
+
+RUN git lfs clone -b main https://github.com/NSpaceTeam/husarion_ws_helper.git /husarion_ws
+
 RUN sudo mkdir /husarion_ws/scripts
-RUN git clone -b master https://github.com/Grkila/husarion_ws.git /husarion_ws
-
-# Postavljamo environment varijable koje će biti dostupne u kontejneru i instalacija Husarnet-a i DDS-a
-
 RUN curl -s https://install.husarnet.com/install.sh | sudo bash
 
+# Postavljamo environment varijable koje će biti dostupne u kontejneru.
+# Ovo su varijable koje ste vi definisali.
 ENV RELEASE="v1.3.5"
 ENV ARCH="amd64"
 
@@ -51,13 +53,14 @@ RUN sudo apt-get update
 RUN sudo apt-get install -y ros-$ROS_DISTRO-rmw-cyclonedds-cpp 
 RUN apt-get install -y nano
 RUN apt-get install -y gedit
+RUN apt-get install -y mesa-utils
 
+    
 #Dodatna podesavanja
 
 RUN git clone -b main https://github.com/Micoo1512/config.git /husarion_ws/scripts
    
 RUN mv /husarion_ws/scripts/cyclonedds.xml /var/tmp/
-
 
 # Step 6: Initialize rosdep, import dependencies, install dependencies, and build the workspace
 # This combines multiple steps into a single RUN command to ensure correct environment variable
@@ -77,6 +80,7 @@ RUN . /husarion_ws/install/setup.bash && echo $MY_VARIABLE
 SHELL ["/bin/bash", "-c"]
 RUN echo "source /husarion_ws/install/setup.bash" >> ~/.bashrc
 RUN echo 'alias run_sim="ros2 launch husarion_ugv_gazebo simulation.launch.py"' >> ~/.bashrc && source ~/.bashrc
+RUN echo 'alias run_sim_marsyard="ros2 launch husarion_ugv_gazebo simulation.launch.py gz_world:=/husarion_ws/install/husarion_gz_worlds/share/husarion_gz_worlds/worlds/mars_yard.sdf"' >> ~/.bashrc && source ~/.bashrc
 # Step 7: Set up the entrypoint to source ROS 2 and the workspace
 # Ensure entrypoint.sh is present in the same directory as the Dockerfile (the build context).
 COPY ./entrypoint.sh /entrypoint.sh
