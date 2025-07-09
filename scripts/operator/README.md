@@ -20,30 +20,30 @@ U ovom slucaju cyclonedds.xml nije bitan i samo se uradi "set_local" da se komun
 Ovi fajlovi ce se takodje nalaziti i u kontejneru za simulaciju,tako da ih i tamo morate source-ovati u zavisnosti od toga kako cete ih koristiti sa istim aliasima tj komandama.
 U nastavku je komanda koju kopirate u vas ~/.bashrc fajl da mozete opet otvoriti operator kontejner
 
-operator_connect() {
-    xhost +local:root # Allow local Docker container to access X server
-    local container_name="operator" # <--- CHANGE THIS if your container name is different
-    local exec_target_name="operator" # <--- CHANGE THIS if exec target is different from start target (usually the same)
+    operator_connect() {
+        xhost +local:root # Allow local Docker container to access X server
+        local container_name="operator" # <--- CHANGE THIS if your container name is different
+        local exec_target_name="operator" # <--- CHANGE THIS if exec target is different from start target (usually the same)
 
-    # Check if the container is currently running
-    if [ -n "$(docker ps -q -f name="^${container_name}$")" ]; then
-        echo "Container '${exec_target_name}' is active. Attaching with exec..."
-        docker exec -it "${exec_target_name}" /bin/bash
-    else
-        # Check if the container exists (even if stopped)
-        if [ -n "$(docker ps -aq -f name="^${container_name}$")" ]; then
-            echo "Container '${container_name}' exists but is not active. Starting..."
-            if docker start "${container_name}"; then
-                echo "Container '${container_name}' started successfully."
-                echo "Attempting to attach now..."
-                docker exec -it "${exec_target_name}" /bin/bash
-            else
-                echo "Failed to start container '${container_name}'. Check Docker logs."
-            fi
+        #Check if the container is currently running
+        if [ -n "$(docker ps -q -f name="^${container_name}$")" ]; then
+            echo "Container '${exec_target_name}' is active. Attaching with exec..."
+            docker exec -it "${exec_target_name}" /bin/bash
         else
-            echo "Container '${container_name}' does not exist. Please create or run it first."
-            echo "Example: Use the 'docker run...' command provided in the setup instructions."
+            # Check if the container exists (even if stopped)
+            if [ -n "$(docker ps -aq -f name="^${container_name}$")" ]; then
+                echo "Container '${container_name}' exists but is not active. Starting..."
+                if docker start "${container_name}"; then
+                    echo "Container '${container_name}' started successfully."
+                    echo "Attempting to attach now..."
+                    docker exec -it "${exec_target_name}" /bin/bash
+                else
+                    echo "Failed to start container '${container_name}'. Check Docker logs."
+                fi
+            else
+                echo "Container '${container_name}' does not exist. Please create or run it first."
+                echo "Example: Use the 'docker run...' command provided in the setup instructions."
+            fi
         fi
-    fi
-}
+    }
 
