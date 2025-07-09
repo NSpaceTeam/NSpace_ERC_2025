@@ -57,6 +57,7 @@ RUN apt-get install -y gedit
 RUN git clone -b main https://github.com/Micoo1512/cyclonedds.git /operator_ws/scripts
    
 RUN mv /operator_ws/scripts/cyclonedds.xml /var/tmp/
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 RUN . /opt/ros/$ROS_DISTRO/setup.bash
 
 RUN echo "alias set_husarnet='source /operator_ws/scripts/husarnet.sh'" >> ~/.bashrc
