@@ -6,8 +6,8 @@ set -e
 # --- Configuration ---
 IMAGE_NAME="my-husarion-operator:jazzy" # Ili vaše željeno ime slike:tag
 DOCKERFILE_DIR="."                     # Pretpostavlja se da je Dockerfile u trenutnom direktorijumu
-CPU_LIMIT="6"                          # Broj CPU jezgara za kontejner
-MEMORY_LIMIT="12g"                     # RAM za kontejner
+CPU_LIMIT="4"                          # Broj CPU jezgara za kontejner
+MEMORY_LIMIT="8g"                     # RAM za kontejner
 BASHRC_FILE="$HOME/.bashrc"
 # --- Konfiguracija za jedinstveni kontejner ---
 CONTAINER_NAME="operator"              # Ime koje će kontejner imati dok radi
