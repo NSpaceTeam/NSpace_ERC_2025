@@ -6,8 +6,8 @@ set -e
 # --- Configuration ---
 IMAGE_NAME="my-husarion-app:jazzy" # Or your preferred image name:tag
 DOCKERFILE_DIR="." # Assumes Dockerfile is in the current directory
-CPU_LIMIT="6" # Default CPU cores for the container
-MEMORY_LIMIT="12g" # Default RAM for the container
+CPU_LIMIT="4" # Default CPU cores for the container
+MEMORY_LIMIT="8g" # Default RAM for the container
 BASHRC_FILE="$HOME/.bashrc"
 # --- End Configuration ---
 
