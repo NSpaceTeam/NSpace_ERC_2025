@@ -58,7 +58,11 @@ BASE_DOCKER_RUN_OPTIONS="-it --rm \
     -m \"${MEMORY_LIMIT}\" \
     --env=\"DISPLAY\" \
     --env=\"QT_X11_NO_MITSHM=1\" \
-    --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\""
+    --env=\"XAUTHORITY=\$XAUTHORITY\" \
+    --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\" \
+    --volume=\"\$XAUTHORITY:\$XAUTHORITY:rw\" \
+    --net=host \
+    --privileged"
 
 # Command to execute before docker run for X11 access
 XHOST_CMD="xhost +local:docker &&"
@@ -66,7 +70,7 @@ XHOST_CMD="xhost +local:docker &&"
 # Alias for No GPU
 ALIAS_NAME_NO_GPU="${ALIAS_PREFIX}_nogpu"
 ALIAS_CMD_NO_GPU="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
-    --name husarion_nogpu \
+    --name husarion_nogpu_\$(date +%s) \
     ${IMAGE_NAME} bash"
 add_or_update_alias "$ALIAS_NAME_NO_GPU" "$ALIAS_CMD_NO_GPU" "Husarion Docker: Run without dedicated GPU acceleration"
 
@@ -74,7 +78,7 @@ add_or_update_alias "$ALIAS_NAME_NO_GPU" "$ALIAS_CMD_NO_GPU" "Husarion Docker: R
 ALIAS_NAME_NVIDIA="${ALIAS_PREFIX}_nvidia"
 ALIAS_CMD_NVIDIA="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
     --gpus all \
-    --name husarion_nvidia \
+    --name husarion_nvidia_\$(date +%s) \
     ${IMAGE_NAME} bash"
 add_or_update_alias "$ALIAS_NAME_NVIDIA" "$ALIAS_CMD_NVIDIA" "Husarion Docker: Run with NVIDIA GPU acceleration"
 
@@ -83,7 +87,7 @@ ALIAS_NAME_INTEL="${ALIAS_PREFIX}_intel"
 ALIAS_CMD_INTEL="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
     --ipc=host \
     --device=/dev/dri:/dev/dri \
-    --name husarion_intel \
+    --name husarion_intel_\$(date +%s) \
     ${IMAGE_NAME} bash"
 add_or_update_alias "$ALIAS_NAME_INTEL" "$ALIAS_CMD_INTEL" "Husarion Docker: Run with INTEL support"
 
@@ -107,13 +111,13 @@ ALIAS_NAME_AMD="${ALIAS_PREFIX}_amd"
 ALIAS_CMD_AMD="${XHOST_CMD} docker run ${BASE_DOCKER_RUN_OPTIONS} \
     --device=/dev/dri:/dev/dri \
     ${AMD_GROUP_ADD_CMD} \
-    --name husarion_amd \
+    --name husarion_amd_\$(date +%s) \
     ${IMAGE_NAME} bash"
 add_or_update_alias "$ALIAS_NAME_AMD" "$ALIAS_CMD_AMD" "Husarion Docker: Run with AMD GPU acceleration"
 
 # Alias for attaching to existing container
 ALIAS_NAME_ATTACH="${ALIAS_PREFIX}_attach"
-ALIAS_CMD_ATTACH="docker exec -it \$(docker ps -q --filter ancestor=${IMAGE_NAME}) bash"
+ALIAS_CMD_ATTACH="docker exec -it \$(docker ps -q --filter ancestor=${IMAGE_NAME} | head -1) bash"
 add_or_update_alias "$ALIAS_NAME_ATTACH" "$ALIAS_CMD_ATTACH" "Husarion Docker: Attach to running container"
 
 echo ""
