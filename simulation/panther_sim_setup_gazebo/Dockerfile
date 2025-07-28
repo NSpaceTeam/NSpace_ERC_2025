@@ -33,6 +33,7 @@ RUN sudo apt-get update && sudo apt-get install -y \
     ros-${ROS_DISTRO}-teleop-twist-keyboard \
     ros-${ROS_DISTRO}-nav2-map-server \
     ros-${ROS_DISTRO}-tf2-tools \
+    ros-${ROS_DISTRO}-pcl-ros \
     # Kitware LiDAR SLAM dependencies
     libeigen3-dev \
     libpcl-dev \
@@ -132,6 +133,21 @@ RUN echo 'alias check_local_map="ros2 topic hz /slam/local_map"' >> ~/.bashrc &&
 RUN echo 'alias echo_3d_map="ros2 topic echo /slam/point_cloud --once"' >> ~/.bashrc && source ~/.bashrc
 RUN echo 'alias rebuild_enhanced_slam="enhanced_3d_kitware_slam.sh && cd /husarion_ws && colcon build --packages-select lidar_slam_minimal"' >> ~/.bashrc && source ~/.bashrc
 RUN echo "alias setup_kitware='setup_kitware_slam && colcon build --packages-select panther_kitware_slam'" >> ~/.bashrc
+# Map export aliases for Kitware SLAM
+# Exports 2D occupancy grid
+RUN echo 'alias export_occupancy_grid="ros2 run nav2_map_server map_saver_cli -f kitware_occupancy_map --ros-args -p map_topic:=/slam/map"' >> ~/.bashrc && source ~/.bashrc
+# Exports 3D point cloud
+RUN echo 'alias export_3d_pointcloud="ros2 bag record -o kitware_3d_map /slam/point_cloud --duration 5"' >> ~/.bashrc && source ~/.bashrc
+# Exports full 3D map with trajectory and local map
+RUN echo 'alias export_full_3d_map="ros2 bag record -o full_kitware_map /slam/point_cloud /slam/local_map /slam/trajectory --duration 10"' >> ~/.bashrc && source ~/.bashrc
+# Converts to PCD format
+RUN echo 'alias save_pcd_map="ros2 run pcl_ros pointcloud_to_pcd input:=/slam/point_cloud"' >> ~/.bashrc && source ~/.bashrc
+# Exports trajectory data(SLAM trajectory path)
+RUN echo 'alias export_trajectory="ros2 bag record -o slam_trajectory /slam/trajectory --duration 5"' >> ~/.bashrc && source ~/.bashrc
+# Exports all SLAM topics for a complete session backup
+# This command records all relevant SLAM topics for 30 seconds into a bag file named complete_slam_session
+# It includes the map, point cloud, local map, trajectory, and pose
+RUN echo 'alias export_all_slam_data="ros2 bag record -o complete_slam_session /slam/map /slam/point_cloud /slam/local_map /slam/trajectory /slam/pose --duration 30"' >> ~/.bashrc && source ~/.bashrc
 # Create custom Kitware SLAM launch file for Panther
 RUN cat > /usr/local/bin/setup_kitware_slam <<'KITWARE_EOF'
 #!/bin/bash
